@@ -1,12 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryHub.Models
 {
-    internal class StockEntry
+    public class StockEntry
     {
+        public Guid Id { get; set; } = Guid.NewGuid(); //Global Unique ID
+        public Product Product { get; set; }
+        public int Quantity { get; set; }
+        public DateTime EntryDate { get; set; }
+        public string EntryType { get; set; }  // "IN" or "OUT"
+
+        public StockEntry() { }
+
+        public StockEntry(Product product, int quantity, DateTime entryDate, string entryType)
+        {
+            Product = product;
+            Quantity = quantity;
+            EntryDate = entryDate;
+            EntryType = entryType;
+        }
     }
 }
+

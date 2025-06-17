@@ -10,52 +10,53 @@ namespace InventoryHub.Services
     public class StockEntryService : IStockEntryService
     {
         private readonly List<StockEntry> _entries;
-        private const string FilePath = "stockEntries.json";
+        private const string FilePath = "stockentries.json";
 
         public StockEntryService()
         {
             _entries = FileStorageHelper.LoadFromFileAsync<StockEntry>(FilePath).Result;
         }
 
-        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType) //async method
+        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType)
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
 
-            if (quantity <= 0)
-                throw new ArgumentException("Quantity must be greater than zero.");
+            if (entryType.ToUpper() != "IN" && entryType.ToUpper() != "OUT")
+                throw new ArgumentException("Entry type must be IN or OUT.");
 
-            if (entryType != "IN" && entryType != "OUT")
-                throw new ArgumentException("Entry type must be 'IN' or 'OUT'.");
+            if (entryType.ToUpper() == "OUT" && quantity > product.Quantity)
+                throw new InvalidOperationException("Insufficient stock.");
 
-            if (entryType == "OUT" && product.Quantity < quantity)
-                throw new InvalidOperationException("Not enough stock available for OUT entry.");
+            var entry = new StockEntry
+            {
+                Product = product,
+                Quantity = quantity,
+                EntryType = entryType.ToUpper(),
+                EntryDate = DateTime.Now
+            };
 
-            var newEntry = new StockEntry(product, quantity, DateTime.UtcNow, entryType);
-
-            if (entryType == "IN")
+            if (entry.EntryType == "IN")
                 product.Quantity += quantity;
             else
                 product.Quantity -= quantity;
 
-            _entries.Add(newEntry);
+            _entries.Add(entry);
             await FileStorageHelper.SaveToFileAsync(FilePath, _entries);
-            return newEntry;
+            return entry;
         }
 
-        public Task<List<StockEntry>> GetAllStockEntries()
+        public async Task<List<StockEntry>> GetAllStockEntries()
         {
-            return Task.FromResult(_entries.OrderByDescending(e => e.EntryDate).ToList());
+            return await Task.FromResult(_entries);
         }
 
-        public Task<List<StockEntry>> GetStockEntriesByProduct(Guid productId)
+        // 🔍 LINQ Feature 3: Filter entries by IN or OUT
+        public async Task<List<StockEntry>> FilterStockEntries(string entryType)
         {
-            var filtered = _entries
-                .Where(e => e.Product.Id == productId)
-                .OrderByDescending(e => e.EntryDate)
-                .ToList();
-
-            return Task.FromResult(filtered);
+            return await Task.FromResult(
+                _entries.Where(e => e.EntryType.Equals(entryType, StringComparison.OrdinalIgnoreCase)).ToList()
+            );
         }
     }
 }

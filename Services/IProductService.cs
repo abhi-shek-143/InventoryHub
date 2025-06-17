@@ -11,5 +11,9 @@ namespace InventoryHub.Services
         Task<Product> UpdateProduct(Product updatedProduct);
         Task<bool> DeleteProduct(Guid productId);
         Task<List<Product>> GetAllProducts();
+
+        // 🔍 LINQ features
+        Task<List<Product>> GetLowStockProducts(int threshold);
+        Task<List<Product>> GetProductsBySupplier(Guid supplierId);
     }
 }

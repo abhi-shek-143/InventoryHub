@@ -8,7 +8,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        // Initialize services
         var productService = new ProductService();
         var supplierService = new SupplierService();
         var stockEntryService = new StockEntryService();
@@ -26,6 +25,11 @@ class Program
             Console.WriteLine("6. Show All Stock Entries");
             Console.WriteLine("7. Update Product");
             Console.WriteLine("8. Delete Product");
+            Console.WriteLine("9. Filter Stock Entries by Product Name");
+            Console.WriteLine("10. Show Low Stock Products");
+            Console.WriteLine("11. Group Products by Supplier");
+            Console.WriteLine("12. Update Supplier");
+            Console.WriteLine("13. Delete Supplier");
             Console.WriteLine("0. Exit");
             Console.Write("Enter option: ");
 
@@ -64,7 +68,7 @@ class Program
                         Guid supplierId = Guid.Parse(Console.ReadLine());
 
                         var newProduct = await productService.AddProduct(productName, description, price, quantity, supplierId);
-                        Console.WriteLine($"Product added with ID: {newProduct.Id}");
+                        Console.WriteLine($"✅ Product added with ID: {newProduct.Id}");
                         break;
 
                     case "3":
@@ -167,6 +171,111 @@ class Program
 
                         bool deleted = await productService.DeleteProduct(deleteId);
                         Console.WriteLine(deleted ? "Product deleted." : "Product not found.");
+                        break;
+
+                    case "9":
+                        Console.Write("Enter product name to filter by: ");
+                        string nameFilter = Console.ReadLine().ToLower();
+
+                        var stockEntries = await stockEntryService.GetAllStockEntries();
+                        var filteredByName = stockEntries
+                            .Where(e => e.Product.Name.ToLower().Contains(nameFilter))
+                            .ToList();
+
+                        if (filteredByName.Count == 0)
+                            Console.WriteLine("No stock entries found for that product name.");
+                        else
+                        {
+                            Console.WriteLine("Filtered Stock Entries:");
+                            foreach (var fe in filteredByName)
+                                Console.WriteLine($"{fe.EntryDate}: {fe.Product.Name} - {fe.EntryType} {fe.Quantity}");
+                        }
+                        break;
+
+                    case "10":
+                        Console.Write("Enter low stock threshold: ");
+                        int threshold = int.Parse(Console.ReadLine());
+
+                        var lowStock = await productService.GetLowStockProducts(threshold);
+                        if (lowStock.Count == 0)
+                            Console.WriteLine("No low-stock products.");
+                        else
+                        {
+                            Console.WriteLine("Low-stock products:");
+                            foreach (var p in lowStock)
+                                Console.WriteLine($"{p.Name} - {p.Quantity} remaining");
+                        }
+                        break;
+
+                    case "11":
+                        var grouped = await productService.GetAllProducts();
+                        var suppliers = await supplierService.GetAllSuppliers();
+
+                        var groupedProducts = grouped
+                            .GroupBy(p => p.SupplierId)
+                            .ToList();
+
+                        foreach (var group in groupedProducts)
+                        {
+                            var supplier = suppliers.FirstOrDefault(s => s.Id == group.Key);
+                            Console.WriteLine($"\nSupplier: {(supplier != null ? supplier.Name : "Unknown")}");
+
+                            foreach (var p in group)
+                                Console.WriteLine($"- {p.Name} (Qty: {p.Quantity})");
+                        }
+                        break;
+
+                    case "12":
+                        var allSuppliersToUpdate = await supplierService.GetAllSuppliers();
+                        if (allSuppliersToUpdate.Count == 0)
+                        {
+                            Console.WriteLine("No suppliers available to update.");
+                            break;
+                        }
+
+                        foreach (var s in allSuppliersToUpdate)
+                            Console.WriteLine($"{s.Id} - {s.Name}");
+
+                        Console.Write("Enter Supplier ID to update: ");
+                        Guid updateSupplierId = Guid.Parse(Console.ReadLine());
+
+                        var supplierToUpdate = allSuppliersToUpdate.FirstOrDefault(s => s.Id == updateSupplierId);
+                        if (supplierToUpdate == null)
+                        {
+                            Console.WriteLine("Supplier not found.");
+                            break;
+                        }
+
+                        Console.Write("New Name (leave blank to keep current): ");
+                        var newSupplierName = Console.ReadLine();
+                        if (!string.IsNullOrWhiteSpace(newSupplierName))
+                            supplierToUpdate.Name = newSupplierName;
+
+                        Console.Write("New Contact Info (leave blank to keep current): ");
+                        var newContact = Console.ReadLine();
+                        if (!string.IsNullOrWhiteSpace(newContact))
+                            supplierToUpdate.ContactInfo = newContact;
+
+                        await supplierService.UpdateSupplier(supplierToUpdate);
+                        Console.WriteLine("Supplier updated.");
+                        break;
+
+                    case "13":
+                        var suppliersToDelete = await supplierService.GetAllSuppliers();
+                        if (suppliersToDelete.Count == 0)
+                        {
+                            Console.WriteLine("No suppliers available to delete.");
+                            break;
+                        }
+
+                        foreach (var s in suppliersToDelete)
+                            Console.WriteLine($"{s.Id} - {s.Name}");
+
+                        Console.Write("Enter Supplier ID to delete: ");
+                        Guid supplierDeleteId = Guid.Parse(Console.ReadLine());
+
+                        bool supplierDeleted = await supplierService.DeleteSupplier(supplierDeleteId);
+                        Console.WriteLine(supplierDeleted ? "Supplier deleted." : "Supplier not found.");
                         break;
 
                     case "0":

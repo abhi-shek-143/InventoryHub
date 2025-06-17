@@ -9,6 +9,8 @@ namespace InventoryHub.Services
     {
         Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType);
         Task<List<StockEntry>> GetAllStockEntries();
-        Task<List<StockEntry>> GetStockEntriesByProduct(Guid productId);
+
+        // 🔍 LINQ feature
+        Task<List<StockEntry>> FilterStockEntries(string entryType);
     }
 }

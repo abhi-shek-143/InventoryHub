@@ -1,4 +1,5 @@
 ﻿using InventoryHub.Models;
+using InventoryHub.Persistence; // ✅ Added
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +11,14 @@ namespace InventoryHub.Services
     public class SupplierService : ISupplierService
     {
         private readonly List<Supplier> supplier;
+        private const string FilePath = "suppliers.json"; // ✅ Added
 
         public SupplierService()
         {
-            supplier = new List<Supplier>();
+            supplier = FileStorageHelper.LoadFromFileAsync<Supplier>(FilePath).Result; // ✅ Load
         }
 
-        // Add
-        public Supplier AddSupplier(string name, string contactInfo)
+        public async Task<Supplier> AddSupplier(string name, string contactInfo) // ✅ Changed to async
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Supplier name cannot be empty.");
@@ -29,11 +30,11 @@ namespace InventoryHub.Services
             };
 
             supplier.Add(newSupplier);
+            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
             return newSupplier;
         }
 
-        // Update 
-        public Supplier UpdateSupplier(Supplier updatedSupplier)
+        public async Task<Supplier> UpdateSupplier(Supplier updatedSupplier) // ✅ Changed to async
         {
             if (updatedSupplier == null)
                 throw new ArgumentNullException(nameof(updatedSupplier));
@@ -48,23 +49,24 @@ namespace InventoryHub.Services
             existingSupplier.Name = updatedSupplier.Name;
             existingSupplier.ContactInfo = updatedSupplier.ContactInfo;
 
+            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
             return existingSupplier;
         }
 
-        // Delete
-        public bool DeleteSupplier(Guid supplierId)
+        public async Task<bool> DeleteSupplier(Guid supplierId) // ✅ Changed to async
         {
             var _supplier = supplier.FirstOrDefault(s => s.Id == supplierId);
-            if (supplier == null)
+            if (_supplier == null)
                 throw new KeyNotFoundException("Supplier not found.");
 
-            return supplier.Remove(_supplier);
+            bool result = supplier.Remove(_supplier);
+            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
+            return result;
         }
 
-        // Get All Suppliers
-        public List<Supplier> GetAllSuppliers()
+        public async Task<List<Supplier>> GetAllSuppliers() // ✅ Changed to async
         {
-            return supplier;
+            return await Task.FromResult(supplier);
         }
     }
 }

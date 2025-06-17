@@ -1,4 +1,5 @@
 ﻿using InventoryHub.Models;
+using InventoryHub.Persistence; // ✅ Added
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +11,14 @@ namespace InventoryHub.Services
     public class ProductService : IProductService
     {
         private readonly List<Product> _products;
+        private const string FilePath = "products.json"; // ✅ Added
 
         public ProductService()
         {
-            _products = new List<Product>();
+            _products = FileStorageHelper.LoadFromFileAsync<Product>(FilePath).Result; // ✅ Load from JSON
         }
 
-
-        public Product AddProduct(string name, string description, decimal price, int quantity, Guid supplierId)
+        public async Task<Product> AddProduct(string name, string description, decimal price, int quantity, Guid supplierId) // ✅ Changed to async
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Product name cannot be empty.");
@@ -35,20 +36,22 @@ namespace InventoryHub.Services
             };
 
             _products.Add(newProduct);
+            await FileStorageHelper.SaveToFileAsync(FilePath, _products); // ✅ Save
             return newProduct;
         }
 
-        public bool DeleteProduct(Guid productId)
+        public async Task<bool> DeleteProduct(Guid productId) // ✅ Changed to async
         {
             var product = _products.FirstOrDefault(p => p.Id == productId);
             if (product == null)
                 throw new KeyNotFoundException("Product not found.");
 
-            return _products.Remove(product);
+            bool result = _products.Remove(product);
+            await FileStorageHelper.SaveToFileAsync(FilePath, _products); // ✅ Save
+            return result;
         }
 
-
-        public Product UpdateProduct(Product updatedProduct)
+        public async Task<Product> UpdateProduct(Product updatedProduct) // ✅ Changed to async
         {
             if (updatedProduct == null)
                 throw new ArgumentNullException(nameof(updatedProduct));
@@ -63,20 +66,19 @@ namespace InventoryHub.Services
             if (updatedProduct.Price < 0 || updatedProduct.Quantity < 0)
                 throw new ArgumentException("Price and quantity must be non-negative.");
 
-            // Update product
             existingProduct.Name = updatedProduct.Name;
             existingProduct.Description = updatedProduct.Description;
             existingProduct.Price = updatedProduct.Price;
             existingProduct.Quantity = updatedProduct.Quantity;
             existingProduct.SupplierId = updatedProduct.SupplierId;
 
+            await FileStorageHelper.SaveToFileAsync(FilePath, _products); // ✅ Save
             return existingProduct;
         }
 
-        // Shared
-        public List<Product> GetAllProducts()
+        public async Task<List<Product>> GetAllProducts() // ✅ Changed to async
         {
-            return _products;
+            return await Task.FromResult(_products);
         }
     }
 }

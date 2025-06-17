@@ -1,24 +1,23 @@
 ﻿using InventoryHub.Models;
-using InventoryHub.Persistence; // ✅ Added
+using InventoryHub.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace InventoryHub.Services
 {
     public class SupplierService : ISupplierService
     {
-        private readonly List<Supplier> supplier;
-        private const string FilePath = "suppliers.json"; // ✅ Added
+        private readonly List<Supplier> _suppliers;
+        private const string FilePath = "suppliers.json";
 
         public SupplierService()
         {
-            supplier = FileStorageHelper.LoadFromFileAsync<Supplier>(FilePath).Result; // ✅ Load
+            _suppliers = FileStorageHelper.LoadFromFileAsync<Supplier>(FilePath).Result;
         }
 
-        public async Task<Supplier> AddSupplier(string name, string contactInfo) // ✅ Changed to async
+        public async Task<Supplier> AddSupplier(string name, string contactInfo)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Supplier name cannot be empty.");
@@ -29,44 +28,44 @@ namespace InventoryHub.Services
                 ContactInfo = contactInfo
             };
 
-            supplier.Add(newSupplier);
-            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
+            _suppliers.Add(newSupplier);
+            await FileStorageHelper.SaveToFileAsync(FilePath, _suppliers);
             return newSupplier;
         }
 
-        public async Task<Supplier> UpdateSupplier(Supplier updatedSupplier) // ✅ Changed to async
+        public async Task<Supplier> UpdateSupplier(Supplier updatedSupplier)
         {
             if (updatedSupplier == null)
                 throw new ArgumentNullException(nameof(updatedSupplier));
 
-            var existingSupplier = supplier.FirstOrDefault(s => s.Id == updatedSupplier.Id);
-            if (existingSupplier == null)
+            var existing = _suppliers.FirstOrDefault(s => s.Id == updatedSupplier.Id);
+            if (existing == null)
                 throw new KeyNotFoundException("Supplier not found.");
 
             if (string.IsNullOrWhiteSpace(updatedSupplier.Name))
                 throw new ArgumentException("Supplier name is required.");
 
-            existingSupplier.Name = updatedSupplier.Name;
-            existingSupplier.ContactInfo = updatedSupplier.ContactInfo;
+            existing.Name = updatedSupplier.Name;
+            existing.ContactInfo = updatedSupplier.ContactInfo;
 
-            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
-            return existingSupplier;
+            await FileStorageHelper.SaveToFileAsync(FilePath, _suppliers);
+            return existing;
         }
 
-        public async Task<bool> DeleteSupplier(Guid supplierId) // ✅ Changed to async
+        public async Task<bool> DeleteSupplier(Guid supplierId)
         {
-            var _supplier = supplier.FirstOrDefault(s => s.Id == supplierId);
-            if (_supplier == null)
+            var supplier = _suppliers.FirstOrDefault(s => s.Id == supplierId);
+            if (supplier == null)
                 throw new KeyNotFoundException("Supplier not found.");
 
-            bool result = supplier.Remove(_supplier);
-            await FileStorageHelper.SaveToFileAsync(FilePath, supplier); // ✅ Save
+            bool result = _suppliers.Remove(supplier);
+            await FileStorageHelper.SaveToFileAsync(FilePath, _suppliers);
             return result;
         }
 
-        public async Task<List<Supplier>> GetAllSuppliers() // ✅ Changed to async
+        public Task<List<Supplier>> GetAllSuppliers()
         {
-            return await Task.FromResult(supplier);
+            return Task.FromResult(_suppliers);
         }
     }
 }

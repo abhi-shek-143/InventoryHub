@@ -1,27 +1,26 @@
 ﻿using InventoryHub.Models;
-using InventoryHub.Persistence; // ✅ Added
+using InventoryHub.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace InventoryHub.Services
 {
     public class StockEntryService : IStockEntryService
     {
-        private readonly List<StockEntry> stockEntry;
-        private const string FilePath = "stockentries.json"; // ✅ Added
+        private readonly List<StockEntry> _entries;
+        private const string FilePath = "stockEntries.json";
 
         public StockEntryService()
         {
-            stockEntry = FileStorageHelper.LoadFromFileAsync<StockEntry>(FilePath).Result; // ✅ Load
+            _entries = FileStorageHelper.LoadFromFileAsync<StockEntry>(FilePath).Result;
         }
 
-        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType) // ✅ Changed to async
+        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType)
         {
             if (product == null)
-                throw new ArgumentNullException(nameof(product), "Product cannot be null.");
+                throw new ArgumentNullException(nameof(product));
 
             if (quantity <= 0)
                 throw new ArgumentException("Quantity must be greater than zero.");
@@ -36,25 +35,27 @@ namespace InventoryHub.Services
 
             if (entryType == "IN")
                 product.Quantity += quantity;
-            else if (entryType == "OUT")
+            else
                 product.Quantity -= quantity;
 
-            stockEntry.Add(newEntry);
-            await FileStorageHelper.SaveToFileAsync(FilePath, stockEntry); // ✅ Save
+            _entries.Add(newEntry);
+            await FileStorageHelper.SaveToFileAsync(FilePath, _entries);
             return newEntry;
         }
 
-        public async Task<List<StockEntry>> GetAllStockEntries() // ✅ Changed to async
+        public Task<List<StockEntry>> GetAllStockEntries()
         {
-            return await Task.FromResult(stockEntry.OrderByDescending(e => e.EntryDate).ToList());
+            return Task.FromResult(_entries.OrderByDescending(e => e.EntryDate).ToList());
         }
 
-        public async Task<List<StockEntry>> GetStockEntriesByProduct(Guid productId) // ✅ Changed to async
+        public Task<List<StockEntry>> GetStockEntriesByProduct(Guid productId)
         {
-            return await Task.FromResult(stockEntry
+            var filtered = _entries
                 .Where(e => e.Product.Id == productId)
                 .OrderByDescending(e => e.EntryDate)
-                .ToList());
+                .ToList();
+
+            return Task.FromResult(filtered);
         }
     }
 }

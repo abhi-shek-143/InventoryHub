@@ -52,7 +52,7 @@ namespace InventoryHub.Services
             return existing;
         }
 
-        public async Task<bool> DeleteSupplier(Guid supplierId)
+        public async Task<bool> DeleteSupplier(Guid supplierId) // updated async method
         {
             var supplier = _suppliers.FirstOrDefault(s => s.Id == supplierId);
             if (supplier == null)

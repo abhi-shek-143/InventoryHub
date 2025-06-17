@@ -13,7 +13,7 @@ class Program
         var supplierService = new SupplierService();
         var stockEntryService = new StockEntryService();
 
-        Console.WriteLine("📦 InventoryHub Console App");
+        Console.WriteLine("InventoryHub Console App");
 
         while (true)
         {

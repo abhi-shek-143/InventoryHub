@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace InventoryHub.Services
 {
-    public class ProductService : IProductService
+    public class ProductService : IProductService 
     {
         private readonly List<Product> _products;
         private const string FilePath = "products.json";
@@ -63,7 +63,7 @@ namespace InventoryHub.Services
             return existingProduct;
         }
 
-        public async Task<bool> DeleteProduct(Guid productId)
+        public async Task<bool> DeleteProduct(Guid productId) //async method
         {
             var product = _products.FirstOrDefault(p => p.Id == productId);
             if (product == null)

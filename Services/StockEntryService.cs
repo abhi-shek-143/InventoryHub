@@ -17,7 +17,7 @@ namespace InventoryHub.Services
             _entries = FileStorageHelper.LoadFromFileAsync<StockEntry>(FilePath).Result;
         }
 
-        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType)
+        public async Task<StockEntry> AddStockEntry(Product product, int quantity, string entryType) //async method
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));

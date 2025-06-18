@@ -85,5 +85,14 @@ namespace InventoryHub.Services
                 _products.Where(p => p.SupplierId == supplierId).ToList()
             );
         }
+
+#if DEBUG
+        public void ClearProductsForTest()
+        {
+            _products.Clear();
+            FileStorageHelper.SaveToFileAsync(FilePath, _products).Wait();
+        }
+#endif
+
     }
 }

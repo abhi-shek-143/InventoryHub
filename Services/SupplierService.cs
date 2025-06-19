@@ -17,7 +17,7 @@ namespace InventoryHub.Services
             _suppliers = FileStorageHelper.LoadFromFileAsync<Supplier>(FilePath).Result;
         }
 
-        public async Task<Supplier> AddSupplier(string name, string contactInfo)
+        public async Task<Supplier> AddSupplier(string name, string contactInfo)// Member 8 - Implemented add supplier logic
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Supplier name cannot be empty.");
@@ -33,7 +33,7 @@ namespace InventoryHub.Services
             return newSupplier;
         }
 
-        public async Task<Supplier> UpdateSupplier(Supplier updatedSupplier)
+        public async Task<Supplier> UpdateSupplier(Supplier updatedSupplier) // Member 8 - Implemented update supplier logic
         {
             if (updatedSupplier == null)
                 throw new ArgumentNullException(nameof(updatedSupplier));
@@ -52,7 +52,7 @@ namespace InventoryHub.Services
             return existing;
         }
 
-        public async Task<bool> DeleteSupplier(Guid supplierId) // updated async method
+        public async Task<bool> DeleteSupplier(Guid supplierId) // updated async method  // Member 8 - Implemented delete supplier logic
         {
             var supplier = _suppliers.FirstOrDefault(s => s.Id == supplierId);
             if (supplier == null)

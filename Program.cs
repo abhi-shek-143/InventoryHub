@@ -68,7 +68,7 @@ class Program
                         Guid supplierId = Guid.Parse(Console.ReadLine());
 
                         var newProduct = await productService.AddProduct(productName, description, price, quantity, supplierId);
-                        Console.WriteLine($"✅ Product added with ID: {newProduct.Id}");
+                        Console.WriteLine($" Product added with ID: {newProduct.Id}");
                         break;
 
                     case "3":
@@ -89,7 +89,7 @@ class Program
                         string entryType = Console.ReadLine();
 
                         var entry = await stockEntryService.AddStockEntry(product, stockQty, entryType);
-                        Console.WriteLine($"✅ Stock entry added on {entry.EntryDate}");
+                        Console.WriteLine($"Stock entry added on {entry.EntryDate}");
                         break;
 
                     case "4":

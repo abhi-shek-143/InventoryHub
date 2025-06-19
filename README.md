@@ -21,19 +21,18 @@ InventoryHub is a console-based inventory management system built with C#. It al
 
 ## Project Structure
 
-InventoryHub/
-├── Models/
-├── Services/
-├── Persistence/
-├── Program.cs
-├── InventoryHub.csproj
+- **InventoryHub/**
+  - `Models/` – Contains core domain classes like `Product`, `Supplier`, and `StockEntry`
+  - `Services/` – Business logic for handling products, suppliers, and stock
+  - `Persistence/` – Helper class for loading/saving data to JSON
+  - `Program.cs` – Entry point for the console app
+  - `InventoryHub.csproj` – Main project file
 
-InventoryHub.Tests/
-├── ProductServiceTests.cs
-├── SupplierServiceTests.cs
-├── StockEntryServiceTests.cs
-└── InventoryHub.Tests.csproj
-
+- **InventoryHub.Tests/**
+  - `ProductServiceTests.cs` – Unit tests for `ProductService`
+  - `SupplierServiceTests.cs` – Unit tests for `SupplierService`
+  - `StockEntryServiceTests.cs` – Unit tests for `StockEntryService`
+  - `InventoryHub.Tests.csproj` – Test project file
 
 ## How to Run
 

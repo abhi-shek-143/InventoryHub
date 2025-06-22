@@ -39,6 +39,7 @@ InventoryHub is a console-based inventory management system built with C#. It al
 1. Open the solution in Visual Studio.
 2. Set `InventoryHub` as the startup project.
 3. Press `Ctrl + F5` to run the application.
+4. Create an Nunit3 test project under the inventory hub solution named `InventoryHub.Tests`. Move the test files to the test project and conduct test using test explorer.
 
 ## Run Unit Tests
 
